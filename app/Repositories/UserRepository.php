@@ -5,31 +5,36 @@ use App\Models\User;
 
 class UserRepository {
 
-    public function all() {
+    public function all(): Collection {
         return User::all();
     }
 
-    //create
-    public function create(array $data) {
+    public function create(array $data): User {
         return User::create($data);
     }
     
-    //read
-    public function find($id) {
-        return User::find($id);
-    }
-
-    //update
-    public function update($id, array $data) {
-        $user = User::find($id);
-        $user->update($data);
-        return $user;
+    public function findByEmail(string $email): ?User {
+        return User::where('email', $email)->first();
     }
     
+    public function findOrFail(int $id): User {
+        return User::findOrFail($id);
+    }
 
-    //delete
-    public function delete($id) {
-        return User::destroy($id);
+    public function update(int $id, array $data): User {
+        try {
+            $user = $this->findOrFail($id);
+            $user->update($data);
+            return $user;
+        } catch (ModelNotFoundException $e) {
+        throw new EntityNotFoundException("Could not find entity with ID {$id}");
+        }
+
+    }
+    
+    public function delete(int $id): bool {
+        $user = $this->findOrFail($id);
+        return User::delete();
     }
 }
 
